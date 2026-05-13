@@ -23,6 +23,7 @@ window.subDutyTracker = window.subDutyTracker || {};
 window.teacherWorkload = {}; 
 window.teacherLevels = {}; 
 window.teacherMaxGrade = {};
+window.dailyExamTracker = {}; // NEW: ஒரு நாளுக்கு ஒரு டியூட்டி என்பதை உறுதி செய்யும் நினைவகம்
 
 function updateStatus(msg) {
     const indicator = document.getElementById('statusIndicator');
@@ -289,13 +290,31 @@ function renderRegularTimetable() {
     updateStatus(`Showing Grid for: ${filterVal}`);
 }
 
-// --- RENDER 2: EXAM SCHEDULE (With Level Matching) ---
+// --- RENDER 2: EXAM SCHEDULE (With One-Duty-Per-Day Logic) ---
 function renderExamSchedule() {
     const pattern = document.getElementById('patternSelect').value;
     const activeGrades = SCHOOL_CONFIG.examPatterns[pattern][currentSession];
     const examData = SCHOOL_CONFIG.examSettings[currentSession];
     const mainGrid = document.getElementById('mainGrid');
     const selectedDate = getSelectedDateStr();
+
+    // =========================================================
+    // 🌟 NEW: DAILY SESSION TRACKER LOGIC
+    // =========================================================
+    // இந்தத் தேதிக்கு நினைவகம் இல்லையென்றால் புதிதாக உருவாக்கு
+    if (!window.dailyExamTracker[selectedDate]) {
+        window.dailyExamTracker[selectedDate] = { FN: [], AN: [] };
+    }
+    
+    // Process பட்டனை மீண்டும் அழுத்தினால் கணக்கு இரட்டிப்பாகாமல் இருக்க இதை Reset செய்கிறோம்
+    window.dailyExamTracker[selectedDate][currentSession] = [];
+
+    // தற்போதைய செஷனுக்கு எதிரான செஷன் எது? (FN என்றால் AN, AN என்றால் FN)
+    const oppositeSession = currentSession === 'FN' ? 'AN' : 'FN';
+    
+    // இன்று மாற்று செஷனில் டியூட்டி பார்த்த ஆசிரியர்களின் பட்டியல்
+    const busyInOtherSession = window.dailyExamTracker[selectedDate][oppositeSession];
+    // =========================================================
 
     const absentCheckboxes = document.querySelectorAll('.absent-chk:checked');
     const absentTeachers = Array.from(absentCheckboxes).map(cb => cb.value);
@@ -314,9 +333,14 @@ function renderExamSchedule() {
     let allTeachers = Object.keys(teacherProfiles);
     if (allTeachers.length === 0) return;
 
-    let presentTeachers = allTeachers.filter(t => !absentTeachers.includes(t));
+    // --- FILTER 1: விடுப்பு எடுத்தவர்கள் மற்றும் மாற்று செஷனில் டியூட்டி பார்த்தவர்களை நீக்குதல் ---
+    let presentTeachers = allTeachers.filter(t => 
+        !absentTeachers.includes(t) && 
+        !busyInOtherSession.includes(t) // The Magic Rule!
+    );
+
     if (presentTeachers.length === 0) {
-        mainGrid.innerHTML = `<div class="text-red-500 font-bold p-4">All teachers are marked absent! Cannot generate duty.</div>`;
+        mainGrid.innerHTML = `<div class="text-red-500 font-bold p-4">அனைத்து ஆசிரியர்களும் விடுப்பிலோ அல்லது மாற்று செஷன் டியூட்டியிலோ உள்ளனர்!</div>`;
         return;
     }
 
@@ -339,16 +363,14 @@ function renderExamSchedule() {
         let examGradeVal = getGradeValue(grade);
         let examCategory = getTeacherCategory(examGradeVal);
 
-        let eligibleTeachers = presentTeachers.filter(t => !teacherProfiles[t].subjects.has("English")); // Configurable subject exclusion
+        let eligibleTeachers = presentTeachers.filter(t => !teacherProfiles[t].subjects.has("English")); 
         if (eligibleTeachers.length === 0) eligibleTeachers = presentTeachers; 
         
-        // Strict Level Matching
         let levelMatchedTeachers = eligibleTeachers.filter(t => window.teacherLevels[t] === examCategory);
         if (levelMatchedTeachers.length > 0) {
             eligibleTeachers = levelMatchedTeachers; 
         }
         
-        // Strict Equal Duty Sort
         eligibleTeachers.sort((a, b) => {
             let examA = tempExamTracker[a] || 0;
             let examB = tempExamTracker[b] || 0;
@@ -359,6 +381,13 @@ function renderExamSchedule() {
         });
         
         let dutyTeacher = eligibleTeachers[0];
+
+        // --- FILTER 2: டியூட்டி பெற்றவரை தற்போதைய செஷனில் நிரந்தரமாகப் பதிவு செய்தல் ---
+        window.dailyExamTracker[selectedDate][currentSession].push(dutyTeacher);
+        
+        // அடுத்த ஹாலுக்கு இவர் பெயர் மீண்டும் வராமல் இருக்க presentTeachers-ல் இருந்து நீக்குதல்
+        presentTeachers = presentTeachers.filter(t => t !== dutyTeacher);
+        
         let teacherCat = window.teacherLevels[dutyTeacher];
         tempExamTracker[dutyTeacher] = (tempExamTracker[dutyTeacher] || 0) + 1;
         let teacherLoad = window.teacherWorkload[dutyTeacher] || 0;
@@ -390,9 +419,8 @@ function renderExamSchedule() {
     html += `</div></div>`;
     mainGrid.innerHTML = html;
     if (window.lucide) window.lucide.createIcons();
-    updateStatus("Exam Schedule Loaded (Segmented & Equal Duty)");
+    updateStatus("Exam Schedule Loaded (Strict 1-Duty-Per-Day Applied)");
 }
-
 // --- RENDER 3: SUBSTITUTION MANAGER (With Level Matching) ---
 function renderSubstituteSchedule() {
     const mainGrid = document.getElementById('mainGrid');
