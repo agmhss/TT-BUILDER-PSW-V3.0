@@ -6,7 +6,7 @@
 const APP_CONFIG = {
     fullName: "AGMHSS PATTEESWARAM", 
     shortName: "AGMHSS PSW",                                           
-    scriptUrl: "https://script.google.com/macros/s/AKfycbz1lQXlw5mIxgZPZzRrGFpkFiZBmLBTm7fE_mH-P9iy7oaFtsh0I-XGo527fzyz1xe0/exec" 
+    scriptUrl: "https://script.google.com/macros/s/AKfycbxENbXmx3Z2M7o9lpPCCbTYsQM1K46541R08VzoM3XR4nIn6OOL9wHwIpfAzttEZgEU/exec" 
 };
 const SCRIPT_URL = APP_CONFIG.scriptUrl;
 
