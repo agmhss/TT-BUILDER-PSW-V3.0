@@ -4,10 +4,9 @@
  */
 
 const APP_CONFIG = {
-    fullName: "ORIENTAL GAHSS", 
-    shortName: "ORIENTAL GAHSS",                                           
-    // 👇 உங்களின் சொந்த SCRIPT URL-ஐ இங்கே பேஸ்ட் செய்யவும் 👇
-    scriptUrl: "https://script.google.com/macros/s/AKfycby5AWmV6uxA09viH5ooofU7pI7Tc3gwjTECenaqoI1u9qD-RqNYWQBcNbSuk0hpb0ORJg/exec" 
+    fullName: "AGMHSS PSW", 
+    shortName: "AGMHSS PSW",                                           
+    scriptUrl: "https://script.google.com/macros/s/AKfycbyd8tRhf0gzoKF__ysQVYunmLruK7EVF8DXOBx5_ubTPACGu1RcI66bkgCC5r3sF9We/exec" 
 };
 const SCRIPT_URL = APP_CONFIG.scriptUrl;
 
@@ -371,7 +370,7 @@ window.renderPasskeysUI = function() {
 window.downloadPasskeysPDF = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
-    doc.setFontSize(16); doc.text("ORIENTAL GAHSS - Staff Portal Passkeys", 14, 20);
+    doc.setFontSize(16); doc.text("AGMHSS PATTEESWARAM - Staff Portal Passkeys", 14, 20);
     doc.setFontSize(10); doc.text("CONFIDENTIAL: Hand over to respective staff only.", 14, 28);
     let tableBody = Object.entries(window.serverAuthData).map(([t, k]) => [t, k]);
     doc.autoTable({ startY: 35, head: [['Teacher Name', 'Secure Passkey']], body: tableBody, theme: 'grid', headStyles: { fillColor: [30, 58, 138] }});
