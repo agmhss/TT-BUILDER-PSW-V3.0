@@ -175,15 +175,16 @@ window.togglePasswordVisibility = function() {
     const eyeClosed = document.getElementById('eyeIconClosed');
     
     if (passInput.type === 'password') {
-        passInput.type = 'text'; // பாஸ்வேர்டைக் காட்டுகிறோம்
+        passInput.type = 'text'; 
         eyeOpen.classList.add('hidden');
-        eyeClosed.classList.remove('hidden'); // கண் மூடிய ஐகானைக் காட்டுகிறோம்
+        eyeClosed.classList.remove('hidden'); 
     } else {
-        passInput.type = 'password'; // பாஸ்வேர்டை மறைக்கிறோம்
-        eyeOpen.classList.remove('hidden'); // கண் திறந்த ஐகானைக் காட்டுகிறோம்
+        passInput.type = 'password'; 
+        eyeOpen.classList.remove('hidden'); 
         eyeClosed.classList.add('hidden');
     }
 };
+
 window.attemptLogin = async function() {
     const role = document.getElementById('loginRole').value;
     const passkey = document.getElementById('loginPasskey').value;
@@ -198,8 +199,10 @@ window.attemptLogin = async function() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('adminPortal').classList.remove('hidden');
             updateStatus("Syncing Data...");
+            
             await window.syncFromCloud(); 
             await checkAndGenerateTeacherPasskeys();
+            
             renderUIAllotmentTable(); renderPasskeysUI(); renderDynamicRulesTable();
             updateStatus("System Ready");
         } else {
@@ -219,6 +222,7 @@ window.attemptLogin = async function() {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('teacherPortal').classList.remove('hidden');
                 document.getElementById('teacherWelcomeText').innerText = `Welcome, ${teacherName}`;
+                
                 await window.syncFromCloud(); 
                 setupTeacherPortalUI();
             } else {
