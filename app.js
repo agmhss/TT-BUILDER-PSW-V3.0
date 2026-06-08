@@ -530,13 +530,12 @@ function generateAutoTimetable() {
 }
 
 // ==========================================
-// 🌟 ALLOTMENT & RULE MANAGER UI
+// 🌟 ALLOTMENT & RULE MANAGER UI (WITH EDIT BUTTON)
 // ==========================================
 window.renderUIAllotmentTable = function() {
     const tbody = document.getElementById('uiAllotmentTableBody');
     if(!tbody) return;
 
-    // 🌟 Calculate Total Periods Per Teacher
     let teacherTotals = {};
     window.uiAllotments.forEach(req => {
         let sum = (parseInt(req.per1) || 0) + (parseInt(req.per2) || 0) + (parseInt(req.per3) || 0);
@@ -555,7 +554,10 @@ window.renderUIAllotmentTable = function() {
                 ${req.act3 ? `<div class="flex gap-2"><span class="w-16 font-black text-blue-700">${req.act3}</span> <span class="bg-gray-100 px-2 rounded">${req.cls3}</span> <span class="text-red-500 font-bold">(${req.per3} Per)</span></div>` : ''}
             </td>
             <td class="p-3 text-center">${req.ct ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold">${req.ct}</span>` : '-'}</td>
-            <td class="p-3 text-center"><button onclick="deleteAllotmentRow(${i})" class="text-red-500 hover:text-red-700"><i data-lucide="trash" class="w-4 h-4 mx-auto"></i></button></td>
+            <td class="p-3 text-center whitespace-nowrap">
+                <button onclick="editAllotmentRow(${i})" class="text-blue-600 hover:text-blue-800 mr-3" title="Edit"><i data-lucide="edit" class="w-4 h-4 mx-auto"></i></button>
+                <button onclick="deleteAllotmentRow(${i})" class="text-red-500 hover:text-red-700" title="Delete"><i data-lucide="trash" class="w-4 h-4 mx-auto"></i></button>
+            </td>
         </tr>
     `).join('');
     if(window.lucide) window.lucide.createIcons();
@@ -568,8 +570,22 @@ window.addTeacherAllotmentUI = function() {
     document.getElementById('newTSub').value = ''; document.getElementById('newTClass').value = ''; document.getElementById('newTCT').value = ''; renderUIAllotmentTable();
 };
 
-window.deleteAllotmentRow = function(index) { if(confirm("Delete this allotment?")) { window.uiAllotments.splice(index, 1); renderUIAllotmentTable(); } };
+// 🌟 NEW: EDIT FUNCTION
+window.editAllotmentRow = function(index) {
+    let req = window.uiAllotments[index];
+    document.getElementById('newTName').value = req.teacherName;
+    document.getElementById('newTSub').value = req.act1;
+    document.getElementById('newTClass').value = req.cls1;
+    document.getElementById('newTPeriods').value = req.per1;
+    document.getElementById('newTCT').value = req.ct || "";
+    
+    // Remove the old entry so the user can save the updated one
+    window.uiAllotments.splice(index, 1);
+    renderUIAllotmentTable();
+    document.getElementById('newTName').focus(); // Auto-scroll to inputs
+};
 
+window.deleteAllotmentRow = function(index) { if(confirm("Delete this allotment?")) { window.uiAllotments.splice(index, 1); renderUIAllotmentTable(); } };
 window.saveAllotmentToCloud = async function() {
     updateStatus("Saving Master Ledger...");
     try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveAllotment", data: window.uiAllotments }) }); alert("Master Allotment Ledger Saved to Cloud securely!"); updateStatus("System Ready"); } catch(e) { alert("Error saving allotment."); }
