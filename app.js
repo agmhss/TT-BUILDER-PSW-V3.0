@@ -4,8 +4,8 @@
  */
 
 const APP_CONFIG = {
-    fullName: "AGMHSS PSW", 
-    shortName: "AGMHSS PSW",                                           
+    fullName: "GHSS Thirumanur", 
+    shortName: "GHSS Thirumanur",                                           
     scriptUrl: "https://script.google.com/macros/s/AKfycbyd8tRhf0gzoKF__ysQVYunmLruK7EVF8DXOBx5_ubTPACGu1RcI66bkgCC5r3sF9We/exec" 
 };
 const SCRIPT_URL = APP_CONFIG.scriptUrl;
